@@ -289,8 +289,8 @@ deploy:staging:
   needs:
     - deploy:development
 
-# Deploy to prod (automatic on main branch)
-deploy:prod:
+# Deploy to production (automatic on main branch)
+deploy:production:
   stage: deploy
   image: bitnami/kubectl:latest
   environment:
