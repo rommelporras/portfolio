@@ -1,0 +1,6 @@
+# robots.txt for rommelporras.com
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://rommelporras.com/sitemap.xml

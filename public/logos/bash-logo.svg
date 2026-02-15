@@ -1,0 +1,5 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <title>Bash</title>
+  <rect x="4" y="10" width="40" height="28" rx="2" fill="none" stroke="#4EAA25" stroke-width="2.5"/>
+  <path fill="#4EAA25" d="M10 18l6 4-6 4v-8zm12 6h12v2H22z"/>
+</svg>

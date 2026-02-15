@@ -1,0 +1,54 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# misc
+.DS_Store
+Thumbs.db
+*.pem
+
+# env files
+.env*.local
+.env
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# lockfiles (using bun)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# playwright
+/test-results/
+/playwright-report/
+test-results.json
+/playwright/.cache/
+/.playwright-mcp/
+/screenshots/
+*.spec.ts-snapshots/
+/*.png
+
+# logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# internal
+docs/plans/
+
+# OS
+backup/

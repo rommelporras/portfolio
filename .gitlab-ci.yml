@@ -1,0 +1,307 @@
+# GitLab CI/CD Pipeline for Portfolio
+# GitFlow: develop → development/staging, main → production
+#
+# Pipeline Strategy:
+#   develop push → validate + test (parallel via DAG) + build + deploy:development
+#   MR (develop→main) → validate + test (quality gate, blocks merge)
+#   main push (after MR merge) → build + deploy:prod (skip re-testing)
+#
+# Stages:
+#   1. validate - lint, type-check, security audit
+#   2. test - unit tests (with coverage), e2e tests (sharded)
+#   3. build - Docker image → GitLab registry
+#   4. deploy - Kubernetes deployments
+#
+# Best Practices Applied:
+#   - MR pipeline gates merge ("Pipelines must succeed" enabled)
+#   - main skips validate+test (already passed in MR pipeline)
+#   - bun install with bun.lock cache key
+#   - Next.js build cache (.next/cache/)
+#   - Cobertura coverage reports for MR visualization
+#   - JUnit test reports for test visualization
+#   - Security scanning with OSV-Scanner (reads bun.lock directly)
+
+stages:
+  - validate
+  - test
+  - build
+  - deploy
+
+variables:
+  # Docker image name in GitLab registry
+  IMAGE_NAME: $CI_REGISTRY_IMAGE
+  # Kubernetes namespace mapping
+  DEV_NAMESPACE: portfolio-dev
+  STAGING_NAMESPACE: portfolio-staging
+  PROD_NAMESPACE: portfolio-prod
+  # bun cache directory for faster installs
+  BUN_INSTALL_CACHE_DIR: '$CI_PROJECT_DIR/.bun-cache'
+  # Node environment
+  NODE_ENV: 'test'
+  # Timezone for logs and timestamps
+  TZ: 'Asia/Manila'
+
+# ==================================
+# Cache Templates
+# ==================================
+
+# bun cache - keyed by bun.lock hash for reproducibility
+.bun-cache: &bun-cache
+  cache:
+    - key:
+        files:
+          - bun.lock
+      paths:
+        - .bun-cache/
+      policy: pull-push
+
+# Next.js build cache - speeds up subsequent builds
+.nextjs-cache: &nextjs-cache
+  cache:
+    - key:
+        files:
+          - bun.lock
+      paths:
+        - .bun-cache/
+      policy: pull
+    - key: nextjs-${CI_COMMIT_REF_SLUG}
+      paths:
+        - .next/cache/
+      policy: pull-push
+
+# ==================================
+# Stage: Validate
+# ==================================
+
+lint:
+  stage: validate
+  image: oven/bun:1-alpine
+  <<: *bun-cache
+  variables:
+    NODE_OPTIONS: '--max-old-space-size=1536'
+  script:
+    - bun install --frozen-lockfile
+    - bun run lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+type-check:
+  stage: validate
+  image: oven/bun:1-alpine
+  <<: *bun-cache
+  script:
+    - bun install --frozen-lockfile
+    - bun run type-check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# Security audit using OSV-Scanner (reads bun.lock directly, no npm needed)
+# Config: .osv-scanner.toml (ignore known/accepted vulnerabilities)
+# Offline DB cached between runs for faster scans
+security-audit:
+  stage: validate
+  image: alpine:3.21
+  variables:
+    OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY: '$CI_PROJECT_DIR/.osv-scanner-cache'
+  cache:
+    - key: osv-db
+      paths:
+        - .osv-scanner-cache/
+      policy: pull-push
+  script:
+    - wget -qO osv-scanner https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64
+    - chmod +x osv-scanner
+    # Download/update offline vulnerability DB (cached between runs)
+    - ./osv-scanner scan --offline --download-offline-databases --lockfile bun.lock --format json > audit-report.json || true
+    # Human-readable table output for CI logs
+    - ./osv-scanner scan --offline --lockfile bun.lock || true
+  artifacts:
+    when: always
+    paths:
+      - audit-report.json
+    expire_in: 30 days
+  allow_failure: true # Don't block pipeline, but report issues
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# ==================================
+# Stage: Test
+# ==================================
+
+test:unit:
+  stage: test
+  image: oven/bun:1-alpine
+  <<: *bun-cache
+  needs: []
+  script:
+    # Install Node.js for V8 coverage support (bun uses JSC, not V8)
+    - apk add --no-cache nodejs
+    - bun install --frozen-lockfile
+    # Run vitest with Node.js to enable @vitest/coverage-v8
+    - node node_modules/.bin/vitest --run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+      - test-results/
+    reports:
+      # JUnit report for test visualization in MR
+      junit: test-results/junit.xml
+      # Cobertura coverage for MR diff visualization
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    expire_in: 7 days
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# E2E Smoke Test - verifies pages load without errors
+# Fast, single job - no sharding overhead
+# Full E2E should be run locally before pushing
+test:e2e:smoke:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  <<: *nextjs-cache
+  needs: []
+  script:
+    - npm install -g bun
+    - bun install --frozen-lockfile
+    - bun run build
+    # Run only smoke tests (page loads, no console errors, no nav interactions)
+    - bunx playwright test tests/e2e/smoke.spec.ts --project=chromium-desktop --reporter=html
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# Full E2E tests (manual trigger for thorough testing)
+# Run this before releases or when testing navigation/interactions
+test:e2e:full:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  <<: *nextjs-cache
+  needs: []
+  script:
+    - npm install -g bun
+    - bun install --frozen-lockfile
+    - bun run build
+    # Run all E2E tests across all browser projects
+    - bunx playwright test --reporter=html
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+  allow_failure: true
+
+# ==================================
+# Stage: Build
+# ==================================
+
+build:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    # Disable TLS for DinD (simpler for homelab)
+    DOCKER_TLS_CERTDIR: ''
+    # Connect to DinD service over TCP without TLS
+    DOCKER_HOST: tcp://docker:2375
+    # Enable BuildKit for better layer caching
+    DOCKER_BUILDKIT: '1'
+  before_script:
+    # Wait for DinD to be ready
+    - until docker info >/dev/null 2>&1; do echo "Waiting for Docker..."; sleep 2; done
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    # Pull previous image for layer cache (ignore failure on first build)
+    - docker pull $IMAGE_NAME:latest || true
+    # Build with cache from previous builds
+    - |
+      docker build \
+        --cache-from $IMAGE_NAME:latest \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        -t $IMAGE_NAME:$CI_COMMIT_SHA \
+        -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG \
+        -t $IMAGE_NAME:latest \
+        .
+    - docker push $IMAGE_NAME:$CI_COMMIT_SHA
+    - docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+    - docker push $IMAGE_NAME:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# ==================================
+# Stage: Deploy
+# ==================================
+
+# Deploy to development (automatic on develop branch)
+deploy:development:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  environment:
+    name: development
+    url: https://portfolio.dev.k8s.rommelporras.com
+  script:
+    - kubectl config set-cluster homelab --server=$KUBE_API_URL --insecure-skip-tls-verify=true
+    - kubectl config set-credentials gitlab --token=$KUBE_TOKEN
+    - kubectl config set-context homelab --cluster=homelab --user=gitlab
+    - kubectl config use-context homelab
+    - kubectl set image deployment/portfolio portfolio=$IMAGE_NAME:$CI_COMMIT_SHA -n $DEV_NAMESPACE
+    - kubectl rollout status deployment/portfolio -n $DEV_NAMESPACE --timeout=120s
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# Deploy to staging (manual trigger from develop)
+deploy:staging:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  environment:
+    name: staging
+    url: https://beta.rommelporras.com
+  script:
+    - kubectl config set-cluster homelab --server=$KUBE_API_URL --insecure-skip-tls-verify=true
+    - kubectl config set-credentials gitlab --token=$KUBE_TOKEN
+    - kubectl config set-context homelab --cluster=homelab --user=gitlab
+    - kubectl config use-context homelab
+    - kubectl set image deployment/portfolio portfolio=$IMAGE_NAME:$CI_COMMIT_SHA -n $STAGING_NAMESPACE
+    - kubectl rollout status deployment/portfolio -n $STAGING_NAMESPACE --timeout=120s
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+  needs:
+    - deploy:development
+
+# Deploy to prod (automatic on main branch)
+deploy:prod:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  environment:
+    name: production
+    url: https://www.rommelporras.com
+  script:
+    - kubectl config set-cluster homelab --server=$KUBE_API_URL --insecure-skip-tls-verify=true
+    - kubectl config set-credentials gitlab --token=$KUBE_TOKEN
+    - kubectl config set-context homelab --cluster=homelab --user=gitlab
+    - kubectl config use-context homelab
+    - kubectl set image deployment/portfolio portfolio=$IMAGE_NAME:$CI_COMMIT_SHA -n $PROD_NAMESPACE
+    - kubectl rollout status deployment/portfolio -n $PROD_NAMESPACE --timeout=120s
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

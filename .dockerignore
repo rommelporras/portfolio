@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Next.js
+.next/
+out/
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+tests/
+
+# Logs
+*.log
+
+# Env files
+.env
+.env*.local
+
+# Misc
+.DS_Store
+*.pem
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docs
+README.md
+CLAUDE.md
+docs/
+
+# CI/CD (not needed in container)
+.gitlab-ci.yml
+.osv-scanner.toml
+
+# Claude Code
+.claude/
+
+# Config files not needed in build
+vitest.config.ts
+playwright.config.ts
+
+# Scripts
+scripts/
+*.pyc
+__pycache__/

@@ -1,0 +1,11 @@
+# OSV-Scanner Configuration
+# https://google.github.io/osv-scanner/configuration/
+
+# Ignore specific vulnerabilities with documented justification.
+# Add entries here when a CVE is reviewed and accepted as non-applicable.
+#
+# Example:
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# reason = "Not exploitable in static export context"
+# ignoreUntil = 2026-06-01T00:00:00Z
