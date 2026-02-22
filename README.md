@@ -32,3 +32,7 @@ bun run build        # Static export to /out
 - [Deployment Guide](docs/DEPLOYMENT.md) -- Kubernetes setup and CI/CD pipeline
 - [Testing Guide](docs/TESTING.md) -- Vitest and Playwright configuration
 - [Changelog](docs/CHANGELOG.md) -- Release history
+
+## Claude Code
+
+This project uses [Claude Code](https://claude.ai/code) with a shared global config — see [rommelporras/claude-config](https://github.com/rommelporras/claude-config) for setup instructions before working on a new machine.
