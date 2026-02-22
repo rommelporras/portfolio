@@ -137,11 +137,8 @@ test:unit:
   <<: *bun-cache
   needs: []
   script:
-    # Install Node.js for V8 coverage support (bun uses JSC, not V8)
-    - apk add --no-cache nodejs
     - bun install --frozen-lockfile
-    # Run vitest with Node.js to enable @vitest/coverage-v8
-    - node node_modules/.bin/vitest --run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+    - bun run vitest --run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
   artifacts:
     when: always
     paths:
