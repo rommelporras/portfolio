@@ -137,11 +137,8 @@ test:unit:
   <<: *bun-cache
   needs: []
   script:
-    # Install Node.js for V8 coverage support (bun uses JSC, not V8)
-    - apk add --no-cache nodejs
     - bun install --frozen-lockfile
-    # Run vitest with Node.js to enable @vitest/coverage-v8
-    - node node_modules/.bin/vitest --run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+    - bun run vitest --run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
   artifacts:
     when: always
     paths:
@@ -165,7 +162,7 @@ test:unit:
 # Full E2E should be run locally before pushing
 test:e2e:smoke:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  image: mcr.microsoft.com/playwright:v1.59.1-noble
   <<: *nextjs-cache
   needs: []
   script:
@@ -188,7 +185,7 @@ test:e2e:smoke:
 # Run this before releases or when testing navigation/interactions
 test:e2e:full:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  image: mcr.microsoft.com/playwright:v1.59.1-noble
   <<: *nextjs-cache
   needs: []
   script:
@@ -289,8 +286,8 @@ deploy:staging:
   needs:
     - deploy:development
 
-# Deploy to prod (automatic on main branch)
-deploy:prod:
+# Deploy to production (automatic on main branch)
+deploy:production:
   stage: deploy
   image: bitnami/kubectl:latest
   environment:

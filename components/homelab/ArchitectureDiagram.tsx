@@ -213,10 +213,15 @@ const ArchitectureDiagram = () => {
             {/* Private Services Grid */}
             <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               <ServiceCard name="Grafana" subtitle="Dashboards" color="amber" />
+              <ServiceCard name="ArgoCD" subtitle="GitOps" color="amber" />
+              <ServiceCard name="Jellyfin" subtitle="Media" color="amber" />
               <ServiceCard name="AdGuard" subtitle="DNS" color="amber" />
+              <ServiceCard name="Vault" subtitle="Secrets" color="amber" />
               <ServiceCard name="Homepage" subtitle="Dashboard" color="amber" />
               <ServiceCard name="Ollama" subtitle="AI" color="amber" />
-              <ServiceCard name="Karakeep" subtitle="Bookmarks" color="amber" />
+              <ServiceCard name="ARR Stack" subtitle="12 services" color="amber" />
+              <ServiceCard name="Monitoring" subtitle="5 exporters" color="amber" />
+              <ServiceCard name="+20 more" subtitle="via Tailscale" color="amber" />
             </div>
           </div>
         </div>

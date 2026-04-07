@@ -49,6 +49,7 @@ logs/
 
 # internal
 docs/plans/
+.superpowers/
 
 # OS
 backup/
