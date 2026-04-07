@@ -162,7 +162,7 @@ test:unit:
 # Full E2E should be run locally before pushing
 test:e2e:smoke:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  image: mcr.microsoft.com/playwright:v1.59.1-noble
   <<: *nextjs-cache
   needs: []
   script:
@@ -185,7 +185,7 @@ test:e2e:smoke:
 # Run this before releases or when testing navigation/interactions
 test:e2e:full:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.58.1-noble
+  image: mcr.microsoft.com/playwright:v1.59.1-noble
   <<: *nextjs-cache
   needs: []
   script:
