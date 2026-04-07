@@ -54,7 +54,8 @@ export const aboutContent: AboutContent = {
       Longhorn storage, GitLab CI/CD, and 99.9% uptime monitoring.`,
     features: [
       { label: '3-Node K8s Cluster' },
-      { label: 'GitLab CI/CD' },
+      { label: 'ArgoCD GitOps' },
+      { label: '50+ Services' },
       { label: '99.9% Uptime' },
       { label: 'Zero Exposed Ports' },
     ],

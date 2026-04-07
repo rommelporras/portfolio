@@ -1,17 +1,32 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import ArchitectureDiagram from '@/components/homelab/ArchitectureDiagram'
+import { CollapsibleSection } from '@/components/homelab/CollapsibleSection'
 import HomelabTOC from '@/components/homelab/HomelabTOC'
+import { MediaFlowDiagram } from '@/components/homelab/MediaFlowDiagram'
 import { Card } from '@/components/ui/Card'
+import {
+  HOMELAB_STATS,
+  PLATFORM_INFRASTRUCTURE,
+  NETWORKING_ACCESS,
+  OBSERVABILITY_STACK,
+  CICD_SERVICES,
+  APPLICATIONS,
+  MEDIA_STACK,
+  DATABASES,
+  ADDITIONAL_INFRASTRUCTURE,
+  TIMELINE_RELEASES,
+  PHASE_COLORS,
+} from '@/data/homelab'
 
 export const metadata: Metadata = {
   title: 'My Homelab - 3-Node Kubernetes Cluster | Rommel Porras',
   description:
-    'Self-hosted 3-node HA Kubernetes cluster with Cilium, Longhorn, GitLab CI/CD. Zero exposed ports, 99.9% uptime. Demonstrating production-grade DevOps skills.',
+    'Self-hosted 3-node HA Kubernetes cluster with Cilium, Longhorn, ArgoCD GitOps. 50+ services, zero exposed ports, 99.9% uptime. Demonstrating production-grade DevOps skills.',
   openGraph: {
     title: 'My Homelab - Self-Hosted Kubernetes Infrastructure',
     description:
-      '3-node K8s cluster, 20+ services, 39 releases. Zero-trust with Cloudflare Tunnel. GitLab CI/CD with 3 environments.',
+      '3-node K8s cluster, 50+ services, 67 releases. Zero-trust with Cloudflare Tunnel. GitLab CI/CD with 3 environments.',
     type: 'website',
   },
 }
@@ -78,23 +93,25 @@ export default function HomelabPage() {
           {/* Stats Bar */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <Card variant="glass" padding="sm">
-              <div className="text-3xl font-bold text-violet-400 mb-1">3</div>
+              <div className="text-3xl font-bold text-violet-400 mb-1">{HOMELAB_STATS.nodes}</div>
               <div className="text-sm text-ghd-text-muted">K8s Nodes</div>
             </Card>
             <Card variant="glass" padding="sm">
-              <div className="text-3xl font-bold text-sky-400 mb-1">20+</div>
+              <div className="text-3xl font-bold text-sky-400 mb-1">{HOMELAB_STATS.services}</div>
               <div className="text-sm text-ghd-text-muted">Services</div>
             </Card>
             <Card variant="glass" padding="sm">
-              <div className="text-3xl font-bold text-amber-400 mb-1">39</div>
+              <div className="text-3xl font-bold text-amber-400 mb-1">{HOMELAB_STATS.releases}</div>
               <div className="text-sm text-ghd-text-muted">Releases</div>
             </Card>
             <Card variant="glass" padding="sm">
-              <div className="text-3xl font-bold text-emerald-400 mb-1">99.9%</div>
+              <div className="text-3xl font-bold text-emerald-400 mb-1">{HOMELAB_STATS.uptime}</div>
               <div className="text-sm text-ghd-text-muted">Uptime</div>
             </Card>
             <Card variant="glass" padding="sm">
-              <div className="text-3xl font-bold text-rose-400 mb-1">0</div>
+              <div className="text-3xl font-bold text-rose-400 mb-1">
+                {HOMELAB_STATS.exposedPorts}
+              </div>
               <div className="text-sm text-ghd-text-muted">Exposed Ports</div>
             </Card>
           </div>
@@ -152,7 +169,7 @@ export default function HomelabPage() {
 
                     {/* Services Count */}
                     <div className="flex flex-col items-center">
-                      <div className="text-3xl font-bold text-ghd-text-primary mb-1">20+</div>
+                      <div className="text-3xl font-bold text-ghd-text-primary mb-1">50+</div>
                       <div className="text-xs text-ghd-text-muted">Services Running</div>
                     </div>
                   </div>
@@ -567,9 +584,17 @@ export default function HomelabPage() {
               CI/CD Pipeline
             </h2>
             <p className="text-xl text-ghd-text-muted">
-              GitFlow branching with multi-environment deployment
+              Two delivery workflows: GitLab CI/CD for app code, ArgoCD GitOps for infrastructure
             </p>
           </div>
+
+          {/* GitLab CI/CD - Application Delivery */}
+          <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
+            <span className="text-2xl">🦊</span> GitLab CI/CD — Application Delivery
+          </h3>
+          <p className="text-sm text-ghd-text-muted mb-4">
+            Portfolio and Invoicetron use GitFlow branching with 3-environment promotion.
+          </p>
 
           {/* Pipeline Flow Diagram */}
           <Card variant="glass" padding="lg" className="mb-6">
@@ -667,6 +692,78 @@ export default function HomelabPage() {
               </tbody>
             </table>
           </Card>
+
+          {/* ArgoCD GitOps - Infrastructure Delivery */}
+          <div className="mt-10">
+            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
+              <span className="text-2xl">🔄</span> ArgoCD GitOps — Infrastructure Delivery
+            </h3>
+            <p className="text-sm text-ghd-text-muted mb-4">
+              50+ services delivered via GitOps. Git is the single source of truth — manual changes
+              are automatically reverted.
+            </p>
+
+            {/* ArgoCD Flow Diagram */}
+            <Card variant="glass" padding="lg" className="mb-6">
+              <div className="flex flex-wrap justify-center items-center gap-2 text-sm font-mono">
+                <span className="px-3 py-1 bg-ghd-border text-ghd-text-body rounded border border-ghd-border">
+                  git push main
+                </span>
+                <span className="text-ghd-text-muted">→</span>
+                <span className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded border border-purple-700">
+                  ArgoCD detects
+                </span>
+                <span className="text-ghd-text-muted">→</span>
+                <span className="px-3 py-1 bg-blue-900/50 text-blue-200 rounded border border-blue-700">
+                  auto-sync
+                </span>
+                <span className="text-ghd-text-muted">→</span>
+                <span className="px-3 py-1 bg-green-600 text-white rounded font-semibold">
+                  cluster reconciled
+                </span>
+              </div>
+            </Card>
+
+            {/* ArgoCD Details */}
+            <Card variant="glass" padding="md">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-bold text-ghd-text-primary mb-3">Pattern</h4>
+                  <ul className="space-y-2 text-sm text-ghd-text-body">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>App-of-apps (single root Application)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>Helm multi-source + Kustomize</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>Trunk-based (direct to main)</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-ghd-text-primary mb-3">Behavior</h4>
+                  <ul className="space-y-2 text-sm text-ghd-text-body">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>Auto-sync within ~3 minutes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>Self-heal (manual kubectl reverted)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400">✓</span>
+                      <span>50+ services across 30+ namespaces</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+          </div>
         </section>
 
         {/* Hardware Stack */}
@@ -748,49 +845,21 @@ export default function HomelabPage() {
               Services Running
             </h2>
             <p className="text-xl text-ghd-text-muted">
-              20+ services across 18 namespaces — all real, all running
+              50+ services across 30+ namespaces — all real, all running
             </p>
           </div>
 
           {/* Platform Infrastructure */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">⚙️</span> Platform Infrastructure
-            </h3>
+          <CollapsibleSection
+            emoji="⚙️"
+            title="Platform Infrastructure"
+            hint="K8s, Cilium, ArgoCD, Vault..."
+            count={PLATFORM_INFRASTRUCTURE.length}
+            accentColor="violet"
+            defaultOpen
+          >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: 'Kubernetes',
-                  version: 'v1.35.0',
-                  desc: '3-node HA control plane with stacked etcd',
-                },
-                { name: 'Cilium', version: 'v1.18.6', desc: 'eBPF-based CNI replacing kube-proxy' },
-                {
-                  name: 'Longhorn',
-                  version: 'v1.10.1',
-                  desc: 'Distributed block storage (2x replication on NVMe)',
-                },
-                {
-                  name: 'kube-vip',
-                  version: 'v1.0.4',
-                  desc: 'HA virtual IP for API server (ARP mode)',
-                },
-                {
-                  name: 'Gateway API',
-                  version: 'v1.4.1',
-                  desc: 'Kubernetes-native ingress with Cilium',
-                },
-                {
-                  name: 'cert-manager',
-                  version: 'v1.19.2',
-                  desc: "Automated Let's Encrypt wildcard TLS certificates",
-                },
-                {
-                  name: 'Metrics Server',
-                  version: 'v0.8.0',
-                  desc: 'Resource metrics for HPA and kubectl top',
-                },
-              ].map((svc) => (
+              {PLATFORM_INFRASTRUCTURE.map((svc) => (
                 <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
@@ -800,31 +869,19 @@ export default function HomelabPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Networking & Access */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">🌐</span> Networking & Access
-            </h3>
+          <CollapsibleSection
+            emoji="🌐"
+            title="Networking & Access"
+            hint="Cloudflare Tunnel, Tailscale, AdGuard"
+            count={NETWORKING_ACCESS.length}
+            accentColor="cyan"
+            defaultOpen
+          >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: 'Cloudflare Tunnel',
-                  version: '2026.1.1',
-                  desc: 'HA tunnel (2 replicas) — zero exposed ports',
-                },
-                {
-                  name: 'Tailscale Operator',
-                  version: 'v1.94.1',
-                  desc: 'WireGuard subnet router for private remote access',
-                },
-                {
-                  name: 'AdGuard Home',
-                  version: 'v0.107.71',
-                  desc: 'Primary DNS server for all VLANs (10.10.30.53)',
-                },
-              ].map((svc) => (
+              {NETWORKING_ACCESS.map((svc) => (
                 <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
@@ -834,57 +891,19 @@ export default function HomelabPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Observability Stack */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">📊</span> Observability Stack
-            </h3>
+          <CollapsibleSection
+            emoji="📊"
+            title="Observability Stack"
+            hint="Prometheus, Grafana, Loki, Alloy..."
+            count={OBSERVABILITY_STACK.length}
+            accentColor="emerald"
+            defaultOpen
+          >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: 'Prometheus',
-                  version: 'v0.88.0',
-                  desc: 'Metrics collection with 177+ default alerting rules',
-                },
-                {
-                  name: 'Grafana',
-                  version: 'kube-prometheus-stack',
-                  desc: 'Dashboards for every service + infrastructure',
-                },
-                { name: 'Loki', version: 'v3.6.3', desc: 'Log aggregation (paired with Grafana)' },
-                {
-                  name: 'Alloy',
-                  version: 'v1.12.2',
-                  desc: 'Log collector (Grafana agent, replaces Promtail)',
-                },
-                {
-                  name: 'Alertmanager',
-                  version: 'v0.30.1',
-                  desc: 'Alert routing to Discord + Email',
-                },
-                {
-                  name: 'Blackbox Exporter',
-                  version: 'v0.28.0',
-                  desc: 'HTTP/TCP probes for endpoint monitoring',
-                },
-                {
-                  name: 'Uptime Kuma',
-                  version: 'v2.0.2',
-                  desc: 'Public status page at status.rommelporras.com',
-                },
-                {
-                  name: 'NUT Exporter',
-                  version: '3.1.1',
-                  desc: 'UPS monitoring (CyberPower CP1500)',
-                },
-                {
-                  name: 'OTel Collector',
-                  version: 'custom',
-                  desc: 'OpenTelemetry data collection (Claude Code metrics)',
-                },
-              ].map((svc) => (
+              {OBSERVABILITY_STACK.map((svc) => (
                 <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
@@ -894,31 +913,18 @@ export default function HomelabPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* CI/CD */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">🦊</span> CI/CD
-            </h3>
+          <CollapsibleSection
+            emoji="🦊"
+            title="CI/CD"
+            hint="GitLab CE, Runner, Registry"
+            count={CICD_SERVICES.length}
+            accentColor="orange"
+          >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: 'GitLab CE',
-                  version: 'v18.8.2',
-                  desc: 'Self-hosted DevOps platform (web, sidekiq, gitaly)',
-                },
-                {
-                  name: 'GitLab Runner',
-                  version: 'v18.8.0',
-                  desc: 'Kubernetes executor for CI/CD jobs',
-                },
-                {
-                  name: 'Container Registry',
-                  version: 'via GitLab',
-                  desc: 'Docker image registry at registry.k8s.rommelporras.com',
-                },
-              ].map((svc) => (
+              {CICD_SERVICES.map((svc) => (
                 <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
@@ -928,122 +934,98 @@ export default function HomelabPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Applications */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">🚀</span> Applications
-            </h3>
+          <CollapsibleSection
+            emoji="🚀"
+            title="Applications"
+            hint="Ghost, Portfolio, Ollama, Karakeep..."
+            count={APPLICATIONS.length}
+            accentColor="sky"
+          >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(() => {
-                const apps: { name: string; version: string; desc: string; url?: string }[] = [
-                  {
-                    name: 'Ghost Blog',
-                    version: '6.14.0',
-                    desc: 'Blog with MySQL + Tinybird analytics',
-                    url: 'blog.rommelporras.com',
-                  },
-                  {
-                    name: 'Ghost Blog (dev)',
-                    version: '6.14.0',
-                    desc: 'Theme development environment',
-                  },
-                  {
-                    name: 'Portfolio',
-                    version: 'Next.js 16.1.0',
-                    desc: 'This website (3-env CI/CD: dev/staging/prod)',
-                    url: 'www.rommelporras.com',
-                  },
-                  {
-                    name: 'Invoicetron',
-                    version: 'Next.js 16.1.0',
-                    desc: 'Invoice processing (Bun + Prisma + PostgreSQL)',
-                    url: 'invoicetron.rommelporras.com',
-                  },
-                  {
-                    name: 'Ollama',
-                    version: '0.15.6',
-                    desc: 'Local LLM inference (CPU): qwen3, moondream, gemma3',
-                  },
-                  {
-                    name: 'Karakeep',
-                    version: '0.30.0',
-                    desc: 'AI bookmark manager (Chrome crawler + Meilisearch + Ollama)',
-                  },
-                  { name: 'Homepage', version: 'v1.9.0', desc: 'Internal dashboard (2 replicas)' },
-                  {
-                    name: 'MySpeed',
-                    version: '1.0.9',
-                    desc: 'Internet speed test tracker (historical)',
-                  },
-                  {
-                    name: 'Firefox Browser',
-                    version: 'latest',
-                    desc: 'Persistent browser via KasmVNC',
-                  },
-                ]
-                return apps.map((svc) => (
-                  <Card key={svc.name} variant="glass" padding="sm">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
-                      <span className="text-xs font-mono text-sky-400">{svc.version}</span>
-                    </div>
-                    <p className="text-sm text-ghd-text-muted">{svc.desc}</p>
-                    {svc.url && (
-                      <a
-                        href={`https://${svc.url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-purple-400 hover:underline mt-1 inline-block"
-                      >
-                        {svc.url}
-                      </a>
-                    )}
-                  </Card>
-                ))
-              })()}
-            </div>
-          </div>
-
-          {/* Databases */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">💾</span> Databases
-            </h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { name: 'MySQL', version: '8.4.8', desc: 'Ghost Blog (dev + prod)' },
-                { name: 'PostgreSQL', version: '18-alpine', desc: 'Invoicetron' },
-                { name: 'Meilisearch', version: 'v1.13.3', desc: 'Karakeep (full-text search)' },
-                { name: 'SQLite', version: 'embedded', desc: 'Uptime Kuma, Karakeep' },
-              ].map((db) => (
-                <Card key={db.name} variant="glass" padding="sm">
+              {APPLICATIONS.map((svc) => (
+                <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-ghd-text-primary">{db.name}</span>
-                    <span className="text-xs font-mono text-amber-400">{db.version}</span>
+                    <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
+                    <span className="text-xs font-mono text-sky-400">{svc.version}</span>
                   </div>
-                  <p className="text-sm text-ghd-text-muted">{db.desc}</p>
+                  <p className="text-sm text-ghd-text-muted">{svc.desc}</p>
+                  {svc.url && (
+                    <a
+                      href={`https://${svc.url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-purple-400 hover:underline mt-1 inline-block"
+                    >
+                      {svc.url}
+                    </a>
+                  )}
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
+
+          {/* Media Stack */}
+          <CollapsibleSection
+            emoji="🎬"
+            title="Media Stack"
+            hint="Jellyfin, Sonarr, Radarr + Intel QSV"
+            count={MEDIA_STACK.length}
+            accentColor="rose"
+          >
+            <p className="text-sm text-ghd-text-muted mb-4">
+              15-service media automation pipeline with Intel QSV hardware transcoding.
+            </p>
+            <MediaFlowDiagram />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {MEDIA_STACK.map((svc) => (
+                <Card key={svc.name} variant="glass" padding="sm">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
+                    <span className="text-xs font-mono text-rose-400">{svc.version}</span>
+                  </div>
+                  <p className="text-sm text-ghd-text-muted">{svc.desc}</p>
+                </Card>
+              ))}
+            </div>
+          </CollapsibleSection>
+
+          {/* Databases */}
+          <CollapsibleSection
+            emoji="💾"
+            title="Databases"
+            hint="MySQL, PostgreSQL, Meilisearch, SQLite"
+            count={DATABASES.length}
+            accentColor="amber"
+          >
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {DATABASES.map((svc) => (
+                <Card key={svc.name} variant="glass" padding="sm">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
+                    <span className="text-xs font-mono text-amber-400">{svc.version}</span>
+                  </div>
+                  <p className="text-sm text-ghd-text-muted">{svc.desc}</p>
+                </Card>
+              ))}
+            </div>
+          </CollapsibleSection>
 
           {/* Additional Infrastructure (Non-K8s) */}
-          <div>
-            <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">🖥️</span> Additional Infrastructure
-            </h3>
+          <CollapsibleSection
+            emoji="🖥️"
+            title="Additional Infrastructure"
+            hint="Proxmox, OPNsense, OMV, Immich"
+            count={ADDITIONAL_INFRASTRUCTURE.length}
+            accentColor="slate"
+          >
             <p className="text-sm text-ghd-text-muted mb-4">
               These services run outside Kubernetes but are part of the homelab ecosystem.
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { name: 'Proxmox VE', version: '9.1.4', desc: 'Hypervisor on Dell 3090' },
-                { name: 'OPNsense', version: '25.7.5', desc: 'Firewall / router (Proxmox VM)' },
-                { name: 'OpenMediaVault', version: '7.6.0', desc: 'NAS / NFS storage' },
-                { name: 'Immich', version: 'latest', desc: 'Photo management' },
-              ].map((svc) => (
+              {ADDITIONAL_INFRASTRUCTURE.map((svc) => (
                 <Card key={svc.name} variant="glass" padding="sm">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-ghd-text-primary">{svc.name}</span>
@@ -1053,7 +1035,7 @@ export default function HomelabPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         </section>
 
         {/* Release Timeline */}
@@ -1066,19 +1048,19 @@ export default function HomelabPage() {
               Release Timeline
             </h2>
             <p className="text-xl text-ghd-text-muted mb-6">
-              39 releases in ~1 month — from empty repo to full production stack
+              67 releases in ~3 months — from empty repo to full production stack
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <Card variant="glass" padding="sm" className="inline-flex">
-                <span className="text-2xl font-bold text-violet-400 mr-2">39</span>
+                <span className="text-2xl font-bold text-violet-400 mr-2">67</span>
                 <span className="text-sm text-ghd-text-muted self-center">Total Releases</span>
               </Card>
               <Card variant="glass" padding="sm" className="inline-flex">
-                <span className="text-2xl font-bold text-sky-400 mr-2">~1 mo</span>
+                <span className="text-2xl font-bold text-sky-400 mr-2">~3 mo</span>
                 <span className="text-sm text-ghd-text-muted self-center">Time Span</span>
               </Card>
               <Card variant="glass" padding="sm" className="inline-flex">
-                <span className="text-2xl font-bold text-emerald-400 mr-2">15</span>
+                <span className="text-2xl font-bold text-emerald-400 mr-2">31</span>
                 <span className="text-sm text-ghd-text-muted self-center">Major Milestones</span>
               </Card>
             </div>
@@ -1094,6 +1076,10 @@ export default function HomelabPage() {
               { phase: 'CI/CD', color: 'bg-orange-500' },
               { phase: 'Applications', color: 'bg-amber-500' },
               { phase: 'AI/ML', color: 'bg-rose-500' },
+              { phase: 'Media', color: 'bg-rose-500' },
+              { phase: 'Security', color: 'bg-red-500' },
+              { phase: 'Backup', color: 'bg-slate-500' },
+              { phase: 'GitOps', color: 'bg-purple-500' },
             ].map(({ phase, color }) => (
               <span key={phase} className="flex items-center gap-1.5 text-ghd-text-muted">
                 <span className={`inline-block w-2.5 h-2.5 rounded-full ${color}`} />
@@ -1108,131 +1094,35 @@ export default function HomelabPage() {
             <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-ghd-border -translate-x-1/2" />
 
             <div className="space-y-6">
-              {(() => {
-                const phaseColors: Record<string, { dot: string; text: string }> = {
-                  Foundation: { dot: 'bg-violet-400', text: 'text-violet-400' },
-                  Bootstrap: { dot: 'bg-violet-400', text: 'text-violet-400' },
-                  Storage: { dot: 'bg-slate-400', text: 'text-slate-400' },
-                  Monitoring: { dot: 'bg-emerald-400', text: 'text-emerald-400' },
-                  Alerting: { dot: 'bg-emerald-400', text: 'text-emerald-400' },
-                  Workloads: { dot: 'bg-sky-400', text: 'text-sky-400' },
-                  Networking: { dot: 'bg-cyan-400', text: 'text-cyan-400' },
-                  'CI/CD': { dot: 'bg-orange-400', text: 'text-orange-400' },
-                  Applications: { dot: 'bg-amber-400', text: 'text-amber-400' },
-                  Enhancement: { dot: 'bg-amber-400', text: 'text-amber-400' },
-                  'AI/ML': { dot: 'bg-rose-400', text: 'text-rose-400' },
-                }
-
-                const releases = [
-                  {
-                    version: 'v0.1.0',
-                    date: 'Jan 12',
-                    title: 'Project Setup',
-                    phase: 'Foundation',
-                  },
-                  {
-                    version: 'v0.2.0',
-                    date: 'Jan 16',
-                    title: 'Kubernetes Cluster Bootstrap',
-                    phase: 'Bootstrap',
-                  },
-                  {
-                    version: 'v0.3.0',
-                    date: 'Jan 17',
-                    title: 'Storage Infrastructure',
-                    phase: 'Storage',
-                  },
-                  {
-                    version: 'v0.4.0',
-                    date: 'Jan 20',
-                    title: 'Observability Stack',
-                    phase: 'Monitoring',
-                  },
-                  {
-                    version: 'v0.5.0',
-                    date: 'Jan 20',
-                    title: 'Alerting (Discord + Email)',
-                    phase: 'Alerting',
-                  },
-                  { version: 'v0.6.0', date: 'Jan 22', title: 'Home Services', phase: 'Workloads' },
-                  {
-                    version: 'v0.7.0',
-                    date: 'Jan 23',
-                    title: 'Cloudflare Tunnel HA',
-                    phase: 'Networking',
-                  },
-                  {
-                    version: 'v0.8.0',
-                    date: 'Jan 24',
-                    title: 'GitLab CI/CD Platform',
-                    phase: 'CI/CD',
-                  },
-                  {
-                    version: 'v0.10.0',
-                    date: 'Jan 28',
-                    title: 'Portfolio CI/CD (3-env)',
-                    phase: 'CI/CD',
-                  },
-                  { version: 'v0.11.0', date: 'Feb 1', title: 'Ghost Blog', phase: 'Applications' },
-                  {
-                    version: 'v0.14.0',
-                    date: 'Feb 5',
-                    title: 'Invoicetron',
-                    phase: 'Applications',
-                  },
-                  {
-                    version: 'v0.17.0',
-                    date: 'Feb 9',
-                    title: 'Ghost Web Analytics',
-                    phase: 'Enhancement',
-                  },
-                  { version: 'v0.20.0', date: 'Feb 11', title: 'Ollama Local AI', phase: 'AI/ML' },
-                  {
-                    version: 'v0.21.0',
-                    date: 'Feb 12',
-                    title: 'Karakeep Migration',
-                    phase: 'Applications',
-                  },
-                  {
-                    version: 'v0.22.0',
-                    date: 'Feb 13',
-                    title: 'Tailscale Operator',
-                    phase: 'Networking',
-                  },
-                ]
-
-                return releases.map((release, index) => {
-                  const colors = phaseColors[release.phase] || phaseColors['Foundation']
-                  return (
+              {TIMELINE_RELEASES.map((release, index) => {
+                const colors = PHASE_COLORS[release.phase] ?? PHASE_COLORS['Foundation']
+                return (
+                  <div
+                    key={release.version}
+                    className={`relative flex items-center ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
+                  >
                     <div
-                      key={release.version}
-                      className={`relative flex items-center ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
+                      className={`absolute left-4 md:left-1/2 w-3 h-3 rounded-full ${colors.dot} border-2 border-ghd-bg -translate-x-1/2 z-10`}
+                    />
+                    <div
+                      className={`ml-10 md:ml-0 md:w-1/2 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}
                     >
-                      <div
-                        className={`absolute left-4 md:left-1/2 w-3 h-3 rounded-full ${colors.dot} border-2 border-ghd-bg -translate-x-1/2 z-10`}
-                      />
-                      <div
-                        className={`ml-10 md:ml-0 md:w-1/2 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}
-                      >
-                        <Card variant="glass" padding="sm">
-                          <div
-                            className={`flex items-center gap-2 mb-1 ${index % 2 === 0 ? 'md:justify-end' : ''}`}
-                          >
-                            <span className={`font-mono text-sm font-bold ${colors.text}`}>
-                              {release.version}
-                            </span>
-                            <span className="text-xs text-ghd-text-muted">
-                              {release.date}, 2026
-                            </span>
-                          </div>
-                          <div className="font-semibold text-ghd-text-primary">{release.title}</div>
-                          <span className={`text-xs ${colors.text}`}>{release.phase}</span>
-                        </Card>
-                      </div>
+                      <Card variant="glass" padding="sm">
+                        <div
+                          className={`flex items-center gap-2 mb-1 ${index % 2 === 0 ? 'md:justify-end' : ''}`}
+                        >
+                          <span className={`font-mono text-sm font-bold ${colors.text}`}>
+                            {release.version}
+                          </span>
+                          <span className="text-xs text-ghd-text-muted">{release.date}, 2026</span>
+                        </div>
+                        <div className="font-semibold text-ghd-text-primary">{release.title}</div>
+                        <span className={`text-xs ${colors.text}`}>{release.phase}</span>
+                      </Card>
                     </div>
-                  )
-                })
-              })()}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
@@ -1513,27 +1403,39 @@ export default function HomelabPage() {
                 <li className="flex items-start gap-2">
                   <span className="text-sky-400 font-bold">•</span>
                   <span>
-                    <strong>Kubernetes-managed apps</strong> - Portfolio, Ghost blog, GitLab CI/CD,
-                    Homepage
+                    <strong>Platform</strong> - ArgoCD, Vault, Velero, cert-manager, Garage S3
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-sky-400 font-bold">•</span>
                   <span>
-                    <strong>Monitoring & Status</strong> - Uptime Kuma (public status page),
-                    Cloudflare Tunnel (HA)
+                    <strong>Applications</strong> - Portfolio, Ghost, Invoicetron, Ollama, Karakeep,
+                    Atuin, Homepage
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-sky-400 font-bold">•</span>
                   <span>
-                    <strong>DNS</strong> - AdGuard Home (primary for all VLANs)
+                    <strong>Media Stack</strong> - Jellyfin, Sonarr, Radarr + 9 more
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-sky-400 font-bold">•</span>
                   <span>
-                    <strong>NAS services</strong> - Immich, OMV (on Dell 3090, running on Proxmox)
+                    <strong>Monitoring</strong> - Prometheus, Grafana, Loki, Uptime Kuma, 5
+                    exporters
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-sky-400 font-bold">•</span>
+                  <span>
+                    <strong>DNS & Networking</strong> - AdGuard Home, Cloudflare Tunnel, Tailscale
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-sky-400 font-bold">•</span>
+                  <span>
+                    <strong>Non-K8s</strong> - Immich, OMV (on Proxmox)
                   </span>
                 </li>
               </ul>
@@ -1594,7 +1496,8 @@ export default function HomelabPage() {
                       <code className="px-1 py-0.5 bg-ghd-border rounded text-xs">
                         kubectl apply
                       </code>{' '}
-                      to K8s namespace (dev/staging/prod)
+                      to K8s namespace (dev/staging/prod). Infrastructure services use ArgoCD GitOps
+                      instead.
                     </div>
                   </div>
                 </div>
@@ -1699,6 +1602,10 @@ export default function HomelabPage() {
                   <span className="text-sky-400">✓</span>
                   <span>Kubernetes rolling deployments</span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-sky-400">✓</span>
+                  <span>ArgoCD GitOps continuous delivery</span>
+                </li>
               </ul>
             </Card>
 
@@ -1723,6 +1630,14 @@ export default function HomelabPage() {
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400">✓</span>
                   <span>Multi-channel alerting (Discord + Email)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>S.M.A.R.T. disk monitoring (smartctl-exporter)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>Version drift detection (version-checker)</span>
                 </li>
               </ul>
             </Card>
@@ -1799,6 +1714,85 @@ export default function HomelabPage() {
                   <span className="text-rose-400">✓</span>
                   <span>Pod Security Standards enforcement</span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-400">✓</span>
+                  <span>132 CiliumNetworkPolicies</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-400">✓</span>
+                  <span>HashiCorp Vault secrets management</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-400">✓</span>
+                  <span>Weekly CIS benchmarks (kube-bench)</span>
+                </li>
+              </ul>
+            </Card>
+
+            <Card variant="glass" padding="md">
+              <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
+                <span className="text-2xl">🔄</span>
+                GitOps
+              </h3>
+              <ul className="space-y-2 text-sm text-ghd-text-body">
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400">✓</span>
+                  <span>ArgoCD app-of-apps pattern</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400">✓</span>
+                  <span>Multi-source Applications</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400">✓</span>
+                  <span>Self-heal and auto-sync</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400">✓</span>
+                  <span>Declarative cluster state (Git as source of truth)</span>
+                </li>
+              </ul>
+            </Card>
+
+            <Card variant="glass" padding="md">
+              <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
+                <span className="text-2xl">🔐</span>
+                Secrets Management
+              </h3>
+              <ul className="space-y-2 text-sm text-ghd-text-body">
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400">✓</span>
+                  <span>HashiCorp Vault (Raft storage, auto-unseal)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400">✓</span>
+                  <span>External Secrets Operator integration</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400">✓</span>
+                  <span>Zero plaintext secrets in Git</span>
+                </li>
+              </ul>
+            </Card>
+
+            <Card variant="glass" padding="md">
+              <h3 className="text-xl font-bold text-ghd-text-primary mb-4 flex items-center gap-2">
+                <span className="text-2xl">💾</span>
+                Backup & DR
+              </h3>
+              <ul className="space-y-2 text-sm text-ghd-text-body">
+                <li className="flex items-start gap-2">
+                  <span className="text-slate-400">✓</span>
+                  <span>Velero cluster backup to self-hosted S3</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-slate-400">✓</span>
+                  <span>Longhorn volume snapshots</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-slate-400">✓</span>
+                  <span>CronJob database dumps + NFS offsite</span>
+                </li>
               </ul>
             </Card>
           </div>
@@ -1828,7 +1822,7 @@ export default function HomelabPage() {
               <ul className="space-y-2 text-ghd-text-body text-sm">
                 <li className="flex justify-between">
                   <span>3x t3.xlarge EC2</span>
-                  <span>$463/mo</span>
+                  <span>$345/mo</span>
                 </li>
                 <li className="flex justify-between">
                   <span>1.5TB EBS gp3</span>
@@ -1836,11 +1830,11 @@ export default function HomelabPage() {
                 </li>
                 <li className="flex justify-between">
                   <span>2TB S3 Standard</span>
-                  <span>$50/mo</span>
+                  <span>$60/mo</span>
                 </li>
                 <li className="flex justify-between">
                   <span>ALB + ACM</span>
-                  <span>$21/mo</span>
+                  <span>$18/mo</span>
                 </li>
                 <li className="flex justify-between">
                   <span>EKS Control Plane</span>
@@ -1848,21 +1842,33 @@ export default function HomelabPage() {
                 </li>
                 <li className="flex justify-between">
                   <span>ECR</span>
-                  <span>$1/mo</span>
+                  <span>$5/mo</span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Secrets Manager</span>
+                  <span>$20/mo</span>
+                </li>
+                <li className="flex justify-between">
+                  <span>RDS MySQL + PostgreSQL x2</span>
+                  <span>$55/mo</span>
+                </li>
+                <li className="flex justify-between">
+                  <span>AWS Backup</span>
+                  <span>$25/mo</span>
                 </li>
                 <li className="flex justify-between">
                   <span>CodePipeline + CodeBuild</span>
-                  <span>$6/mo</span>
+                  <span>$3/mo</span>
                 </li>
                 <li className="flex justify-between">
-                  <span>CloudWatch</span>
-                  <span>$8/mo</span>
+                  <span>CloudWatch + Logs</span>
+                  <span>$15/mo</span>
                 </li>
               </ul>
               <div className="mt-4 pt-4 border-t border-ghd-border">
                 <div className="flex justify-between text-xl font-bold text-orange-400">
                   <span>Total</span>
-                  <span>~$766/mo</span>
+                  <span>~$763/mo</span>
                 </div>
               </div>
             </Card>
@@ -1872,8 +1878,8 @@ export default function HomelabPage() {
               <h3 className="text-xl font-bold text-ghd-text-primary mb-4">🏠 Homelab</h3>
               <ul className="space-y-2 text-ghd-text-body text-sm">
                 <li className="flex justify-between">
-                  <span>Electricity (~100W)</span>
-                  <span>~$17/mo</span>
+                  <span>Electricity (~110W)</span>
+                  <span>~$19/mo</span>
                 </li>
                 <li className="flex justify-between">
                   <span>Cloudflare (free tier)</span>
@@ -1889,13 +1895,13 @@ export default function HomelabPage() {
                 </li>
               </ul>
               <p className="mt-3 text-xs text-ghd-text-muted">
-                ~100W covers all devices: 3 K8s nodes, Dell 3090 NAS, firewall, UPS, switch, 2 WiFi
-                APs, 2 modems
+                ~110W covers all devices: 3 K8s nodes, Dell 3090 NAS, firewall, UPS, switch, 2 WiFi
+                APs, 2 modems (₱13.82/kWh)
               </p>
               <div className="mt-4 pt-4 border-t border-ghd-border">
                 <div className="flex justify-between text-xl font-bold text-green-400">
                   <span>Total</span>
-                  <span>~$17/mo</span>
+                  <span>~$20/mo</span>
                 </div>
               </div>
             </Card>
@@ -1913,11 +1919,11 @@ export default function HomelabPage() {
                 <div className="text-sm text-ghd-text-muted">Break-even</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-emerald-400">$749/mo</div>
+                <div className="text-2xl font-bold text-emerald-400">$743/mo</div>
                 <div className="text-sm text-ghd-text-muted">Monthly Savings</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-amber-400">$8,988/yr</div>
+                <div className="text-2xl font-bold text-amber-400">$8,916/yr</div>
                 <div className="text-sm text-ghd-text-muted">Annual Savings</div>
               </div>
             </div>
@@ -1983,6 +1989,11 @@ export default function HomelabPage() {
             </div>
           </Card>
         </section>
+
+        {/* Last Updated */}
+        <div className="max-w-4xl mx-auto px-6 mt-8 text-center">
+          <p className="text-xs text-ghd-text-muted">Last verified: April 2026</p>
+        </div>
       </main>
     </>
   )
