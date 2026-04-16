@@ -39,7 +39,7 @@ export default defineConfig({
 
     // Coverage configuration
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       // cobertura format required for GitLab MR coverage visualization
       reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
       include: [

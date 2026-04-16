@@ -6,7 +6,7 @@ Coding guide for this repository. Every line prevents a mistake — if it's obvi
 
 **NEVER commit, push, or run any git write operations.** User controls all git ops via `/commit` or explicit commands. This applies to subagents too.
 
-When the user commits: use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`). No AI attribution, no co-authored-by lines.
+When the user commits: use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 
 ## Commands
 
@@ -20,8 +20,6 @@ bun run test:unit        # Vitest (add --run for CI, --watch for dev)
 bun run test:e2e         # Playwright (all browsers + mobile)
 bun run test             # Unit (--run) + E2E combined
 ```
-
-Always use `bun`, never `npm`.
 
 ## Documentation Lookup
 
