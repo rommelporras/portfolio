@@ -249,7 +249,7 @@ build:
 # Stage: Deploy
 # ==================================
 
-# Deploy to development (automatic on develop branch)
+# Deploy to development (manual — ArgoCD now manages image updates; kept as emergency break-glass)
 deploy:development:
   stage: deploy
   image: bitnami/kubectl:latest
@@ -265,6 +265,7 @@ deploy:development:
     - kubectl rollout status deployment/portfolio -n $DEV_NAMESPACE --timeout=120s
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
 
 # Deploy to staging (manual trigger from develop)
 deploy:staging:
@@ -286,7 +287,7 @@ deploy:staging:
   needs:
     - deploy:development
 
-# Deploy to production (automatic on main branch)
+# Deploy to production (manual — ArgoCD now manages image updates; kept as emergency break-glass)
 deploy:production:
   stage: deploy
   image: bitnami/kubectl:latest
@@ -302,3 +303,4 @@ deploy:production:
     - kubectl rollout status deployment/portfolio -n $PROD_NAMESPACE --timeout=120s
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
